@@ -10,10 +10,10 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.lifecycleScope
 import com.ji1.assistant.api.TelegramApi
+import com.ji1.assistant.service.KakaoNotificationService
 import com.ji1.assistant.service.WifiMonitorService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -37,8 +37,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnTestTelegram).setOnClickListener {
-            CoroutineScope(Dispatchers.Main).launch {
-                val ok = TelegramApi.sendMessage("[JI1-APP] type=test message=앱 테스트")
+            lifecycleScope.launch {
+                val ok = TelegramApi.sendSignal("test", extra = mapOf("message" to "앱 테스트"))
                 updateStatus(if (ok) "텔레그램 전송 성공" else "텔레그램 전송 실패")
             }
         }
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkNotificationAccess() {
-        val cn = ComponentName(this, "com.ji1.assistant.service.KakaoNotificationService")
+        val cn = ComponentName(this, KakaoNotificationService::class.java)
         val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
         val enabled = flat?.contains(cn.flattenToString()) == true
         val tv = findViewById<TextView>(R.id.tvNotifStatus)
